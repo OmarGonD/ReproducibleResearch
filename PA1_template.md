@@ -32,7 +32,8 @@ You can donwload it from here: [Activity monitoring data](https://d396qusza40orc
 For the entire project, we'll need to use basically two librarys: `dplyr` and `ggplot2`, so let's load them first:
 
 
-```{r message=FALSE}
+
+```r
 library(dplyr)
 library(ggplot2)
 ```
@@ -40,17 +41,17 @@ library(ggplot2)
 
 Then we need `read.csv()` to load the data.
 
-```{r echo = T}
+
+```r
 activity <- read.csv("Z:\\OMAR\\RCoursera\\RepData\\RepData_PeerAssessment1\\activity.csv")
 ```
 
 
 We have a column with dates information. So, just to be sure, we're going to give it the right format with `as.Date()`:
 
-```{r}
 
+```r
 activity$date <- as.Date(activity$date)
-
 ```
 
 
@@ -60,9 +61,13 @@ activity$date <- as.Date(activity$date)
 
 To solve this, you can use the original data set `activity` and the function `sum`:
 
-```{r echo = T}
-sum(activity$steps, na.rm = T)
 
+```r
+sum(activity$steps, na.rm = T)
+```
+
+```
+## [1] 570608
 ```
 
 ### Make a histogram of the total number of steps taken each day
@@ -76,34 +81,44 @@ To answer this, we need to:
 
 To group the number of steps by date, We're going to use the `dplyr` library, as follows:
 
-```{r, echo=T}
 
+```r
 steps.bydate <- activity %>%
                 group_by(date) %>%
                 summarise(steps.sum = sum(steps, na.rm = T),
                           steps.mean = mean(steps, na.rm = T))
- 
 ```
 
 
 Now we can plot the total number of steps taken each day:
 
 
-```{r echo = T}
 
+```r
 ggplot(data=steps.bydate, aes(steps.bydate$steps.sum)) + geom_histogram(binwidth = 3000)
-
 ```
+
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
 
 
 ## Calculate and report the mean and median of the total number of steps taken per day
 
 
-```{r}
 
+```r
 mean(steps.bydate$steps.sum, na.rm = T)
-median(steps.bydate$steps.sum, na.rm = T)
+```
 
+```
+## [1] 9354.23
+```
+
+```r
+median(steps.bydate$steps.sum, na.rm = T)
+```
+
+```
+## [1] 10395
 ```
 
 
@@ -123,34 +138,43 @@ We divide the sum of steps by interval by 61, because there are 61 intervals for
 
 
 
-```{r}
 
+```r
 activity.pattern <- activity %>%
     group_by(interval) %>%
     summarise(steps.sum = sum(steps, na.rm = T),
               steps.mean = round(steps.sum/61, 0))
-              
-
 ```
 
 
 
-```{r}
+
+```r
 ggplot(data=activity.pattern,
        aes(x = activity.pattern$interval, y = activity.pattern$steps.mean)) +
     labs(y = "Steps (mean)", x = "Interval") +
     geom_line()
 ```
 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+
 
 ### Which 5-minute interval, on average across all the days in the dataset contains the maximum number of steps?
 
 
 
-```{r message=FALSE}
+
+```r
 max.steps.sum <- max(activity.pattern$steps.sum)
 
 activity.pattern[activity.pattern$steps.sum == max.steps.sum,]
+```
+
+```
+## Source: local data frame [1 x 3]
+## 
+##   interval steps.sum steps.mean
+## 1      835     10927        179
 ```
 
 
@@ -163,8 +187,13 @@ activity.pattern[activity.pattern$steps.sum == max.steps.sum,]
 
 
 
-```{r}
+
+```r
 sum(!complete.cases(activity))
+```
+
+```
+## [1] 2304
 ```
 
 
@@ -178,12 +207,10 @@ sum(!complete.cases(activity))
 
 
 
-```{r}
 
+```r
 activity$steps <- ifelse(is.na(activity$steps) == TRUE,
                                   activity.pattern$steps.mean[activity.pattern$interval %in% activity$interval], activity$steps)
-
-
 ```
 
 
@@ -191,7 +218,8 @@ activity$steps <- ifelse(is.na(activity$steps) == TRUE,
 ### Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 
-```{r}
+
+```r
 activity.complete <- activity
 ```
 
@@ -201,21 +229,23 @@ activity.complete <- activity
 ## Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 
-```{r}
+
+```r
 activity.complete.bydate <- activity.complete %>%
     group_by(date) %>%
     summarise(steps.sum = sum(steps, na.rm = T),
               steps.mean = mean(steps, na.rm = T))
-
 ```
 
 
-```{r}
+
+```r
 ggplot(data=activity.complete.bydate, aes(x = steps.sum)) + geom_histogram(binwidth = 3000) +
 geom_vline(aes(xintercept=mean(steps.sum, na.rm = T)), colour="red", size=0.5, linetype="dashed") +
 geom_vline(aes(xintercept=median(steps.sum, na.rm = T)), colour="blue", size=0.5, linetype="dashed")     
-
 ```
+
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png) 
 
 
 
@@ -227,12 +257,29 @@ If we compare the original data set (with NAs) and the imputed missing data set,
 
 
 
-```{r}
 
+```r
 sum(activity.complete.bydate$steps.sum) # From 570608 to 645424
-mean(activity.complete.bydate$steps.sum) # From 9354.23 to 10580.72
-median(activity.complete.bydate$steps.sum) # Before: 10395, after: 10395. Does not change.
+```
 
+```
+## [1] 645424
+```
+
+```r
+mean(activity.complete.bydate$steps.sum) # From 9354.23 to 10580.72
+```
+
+```
+## [1] 10580.72
+```
+
+```r
+median(activity.complete.bydate$steps.sum) # Before: 10395, after: 10395. Does not change.
+```
+
+```
+## [1] 10395
 ```
 
 
@@ -248,18 +295,17 @@ median(activity.complete.bydate$steps.sum) # Before: 10395, after: 10395. Does n
 Let's use the `weekdays()` function to get the days from the `date` column, and create a new column `days`
 
 
-```{r}
 
+```r
 activity.complete$days <- weekdays(activity$date)
-
 ```
 
 
 Now let's create a column with 2 factors: `Weekday` and `Weekend`. For this, we're going to use the days return from the funcion`weekdays()`, and an `ifelse` construction, with some `regex`.
 
 
-```{r}
 
+```r
 activity.complete <- mutate(activity.complete,
                    Weekday = NA,
                    Weekday = ifelse(grepl("lunes", days)
@@ -270,20 +316,16 @@ activity.complete <- mutate(activity.complete,
                    Weekday = ifelse(grepl("sábado", days)
                                    | grepl("domingo", days),
                                    "Weekend", Weekday))
-
-
-
 ```
 
 
 
 
-```{r}
 
+```r
 Weekdays.plot <- activity.complete %>%
                  group_by(Weekday, interval) %>%
                  summarise(steps_mean = mean(steps, na.rm = T))
-
 ```
 
 ### Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
@@ -301,24 +343,17 @@ Yes. Wee see some differences in the 5-minute interval:
 + _Weekday days (interval  > 1,500)_
 
 
-```{r echo = F}
 
-
-
-sum(Weekdays.plot$steps_mean[Weekdays.plot$interval > 1500 & Weekdays.plot$Weekday == "Weekday"]) 
-
-
+```
+## [1] NA
 ```
 
 
 + _Weekend days (interval  > 1,500)_
 
-```{r echo = F}
 
-
-
- sum(Weekdays.plot$steps_mean[Weekdays.plot$interval > 1500 & Weekdays.plot$Weekday == "Weekend"]) 
-
+```
+## [1] NA
 ```
 
 
@@ -326,14 +361,15 @@ sum(Weekdays.plot$steps_mean[Weekdays.plot$interval > 1500 & Weekdays.plot$Weekd
 
 
 
-```{r}
 
+```r
 ggplot(data = Weekdays.plot, aes(x = interval, y = steps_mean))  +
      geom_line(color = "red") +
      labs(y = "Steps mean", x = "Interval")  +
      facet_grid(Weekday ~ .)
-
 ```
+
+![plot of chunk unnamed-chunk-22](figure/unnamed-chunk-22-1.png) 
 
 
 
